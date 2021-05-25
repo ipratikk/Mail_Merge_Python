@@ -9,12 +9,14 @@ from lbox import LBox
 from config import Config_data
 
 class MailGUI:
-    def __init__(self,app_name,email_list):
+    def __init__(self,email_list):
         self.email_list = email_list
 
-        root = Tk()
-        root.wm_title(app_name)
+        root = Toplevel()
+        root.wm_title("Email Client")
         root.minsize(500,250)
+        root.grab_set()
+        root.focus()
 
         self.root = root
         self.add_server_picker()
@@ -76,7 +78,7 @@ class MailGUI:
         self.send_mail.grid(row = 21,ipadx = 4, padx = 10,ipady = 3, pady = 10, column = 20, columnspan = 6,sticky = N+S+E+W)
 
     def add_copyright_lbl(self):
-        copyright = "© 2020 Ernst & Young LLP, Published in India"
+        copyright = "© 2021 Pratik Goel, Published in India"
         self.cp_lbl = Label(self.root,text = copyright,)
         self.cp_lbl.grid(row = 24, padx = 10 , pady = 10, column = 4, columnspan = 11,sticky = N+S+E+W)
 
