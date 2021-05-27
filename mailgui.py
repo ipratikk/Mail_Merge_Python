@@ -23,6 +23,7 @@ class MailGUI:
         self.add_sender_email()
         self.add_receipent_email()
         self.add_cc_emails()
+        self.add_subject_inp()
         self.add_send_btn()
         self.add_copyright_lbl()
 
@@ -72,6 +73,13 @@ class MailGUI:
         self.cc.grid(row = 5, column = 3,padx = 10, pady = 10,columnspan = 15,sticky = N+S+E+W)
         self.cc_select = Button(self.root,text = "Select",command = lambda:LBox("CC",self.cc_str))
         self.cc_select.grid(row = 5, padx = 10, pady = 10, column = 20, columnspan = 3,sticky = N+S+E+W)
+
+    def add_subject_inp(self):
+        self.subject_str = StringVar()
+        self.subject_lbl = Label(self.root,text = "Subject")
+        self.subject_lbl.grid(row = 7, padx = 10 , pady = 10, column = 0, columnspan = 2,sticky = N+S+E+W)
+        self.subject = Entry(self.root,font = "Consolas 10",textvariable = self.subject_str,width = "50")
+        self.subject.grid(row = 7, column = 3,padx = 10, pady = 10,columnspan = 15,sticky = N+S+E+W)
 
     def add_send_btn(self):
         self.send_mail = Button(self.root,text = "Send Email",command = lambda:self.run_script(self.server,self.sender_email,self.receipent,self.cc))
