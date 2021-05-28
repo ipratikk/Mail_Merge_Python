@@ -1,3 +1,5 @@
+import threading
+
 from tkinter import *
 from tkinter.ttk import *
 from tkinter.scrolledtext import ScrolledText
@@ -7,10 +9,12 @@ from tkinter import messagebox
 
 from lbox import LBox
 from config import Config_data
+from imap_email import Send_Mail
 
 class MailGUI:
-    def __init__(self,email_list):
-        self.email_list = email_list
+    def __init__(self,data):
+        self.data = data
+        self.email_list = self.data['Email'].to_list()
 
         root = Toplevel()
         root.wm_title("Email Client")
@@ -24,6 +28,7 @@ class MailGUI:
         self.add_receipent_email()
         self.add_cc_emails()
         self.add_subject_inp()
+        self.add_body_inp()
         self.add_send_btn()
         self.add_copyright_lbl()
 
@@ -81,8 +86,14 @@ class MailGUI:
         self.subject = Entry(self.root,font = "Consolas 10",textvariable = self.subject_str,width = "50")
         self.subject.grid(row = 7, column = 3,padx = 10, pady = 10,columnspan = 15,sticky = N+S+E+W)
 
+    def add_body_inp(self):
+        self.body_lbl = Label(self.root,text = "Body")
+        self.body_lbl.grid(row = 9, padx = 10 , pady = 10, column = 0, columnspan = 2,sticky = N+S+E+W)
+        self.body = ScrolledText(self.root,font = "Consolas 10",width = "50",height=6,wrap=WORD)
+        self.body.grid(row = 9, column = 3,padx = 10, pady = 10,columnspan = 15,sticky = N+S+E+W)
+
     def add_send_btn(self):
-        self.send_mail = Button(self.root,text = "Send Email",command = lambda:self.run_script(self.server,self.sender_email,self.receipent,self.cc))
+        self.send_mail = Button(self.root,text = "Send Email",command = self.run_script)
         self.send_mail.grid(row = 21,ipadx = 4, padx = 10,ipady = 3, pady = 10, column = 20, columnspan = 6,sticky = N+S+E+W)
 
     def add_copyright_lbl(self):
@@ -91,5 +102,25 @@ class MailGUI:
         self.cp_lbl.grid(row = 24, padx = 10 , pady = 10, column = 4, columnspan = 11,sticky = N+S+E+W)
 
     def run_script(self):
-        print("Running")
+        #Tk().withdraw()
+        self.pwd= simpledialog.askstring("Password", "Enter password:", show='*')
+        print(self.pwd)
+        self.root.focus()
         
+        thread1 = threading.Thread(target = self.send_emails)
+        thread1.start()
+    
+    def send_emails(self):
+        self.var = StringVar()
+
+        self.status_lbl = Label(self.root,textvariable = self.var)
+        self.status_lbl.grid(row = 13, padx = 10 , pady = 10, column = 1, columnspan = 10,sticky = N+S+E+W)
+        
+        self.progress = Progressbar(self.root,orient = HORIZONTAL, length = 100, mode = 'determinate')
+        self.progress.grid(row = 15, padx = 10, pady = 10, column = 1, columnspan = 60,sticky = N+S+E+W)
+        self.progress['value'] = 0
+        
+        obj = Send_Mail(self.server,self.sender_email_str,self.receipent_str,self.cc_str,self.subject_str,self.body,self.data,status_str=self.var,progressbar=self.progress)
+        #pwd = simpledialog.askstring(title="Authenticate Email",prompt=f"Enter password:")
+        obj.login(password=self.pwd)
+        obj.send_emails()

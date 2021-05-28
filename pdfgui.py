@@ -13,6 +13,7 @@ from mailgui import MailGUI
 class PDF_Preview:
     def __init__(self,data):
         self.setup = Setup()
+        self.data = data
         self.idx_str = StringVar()
 
         self.idx = [0]
@@ -99,5 +100,5 @@ class PDF_Preview:
 
     def send_emails(self):
         self.root.destroy()
-        MailGUI(self.pdf_files)
+        MailGUI(self.data)
     

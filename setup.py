@@ -53,7 +53,7 @@ class Setup:
 
         org_img = '<img src="cid:image1" width="80" height="60">'
 
-        self.signature = f"""Regards,\n{sender_details}\n\n<table style="font-size:60%;"><tr><td>{org_img}</td><td>{org_details}</td></tr></table>"""
+        self.signature = f"""Regards,\n{sender_details}\n\n<table style="font-size:80%;"><tr><td>{org_img}</td><td>{org_details}</td></tr></table>"""
         self.signature = self.signature.replace("\n","<br/>")
         return self.signature
 
