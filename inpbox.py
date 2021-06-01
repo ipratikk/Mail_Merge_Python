@@ -5,6 +5,10 @@ from tkinter.filedialog import askopenfilename,askdirectory
 import tkinter.simpledialog as simpledialog
 from tkinter import messagebox
 
+import os
+import logging
+logger = logging.getLogger(f"MailMerge.{os.path.basename(__file__)}")
+
 class InpBox:
     def __init__(self,title,LBox):
         self.title = title

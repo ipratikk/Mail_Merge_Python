@@ -4,11 +4,14 @@ from tkinter.scrolledtext import ScrolledText
 from tkinter.filedialog import askopenfilename,askdirectory
 from tkinter import messagebox
 
-import os
-
 from setup import Setup
 from tkPDFViewer import tkPDFViewer as pdf
 from mailgui import MailGUI
+
+import os
+import logging
+logger = logging.getLogger(f"MailMerge.{os.path.basename(__file__)}")
+
 
 class PDF_Preview:
     def __init__(self,data):
@@ -20,6 +23,7 @@ class PDF_Preview:
         self.pdf_files = data['Email'].to_list()
         self.total = len(self.pdf_files)
         
+        logger.info("Initialising PDF Preview GUI")
         top = Toplevel()
         top.wm_title("Mail Merge Preview")
         top.minsize(550,750)
@@ -99,6 +103,8 @@ class PDF_Preview:
         self.send_btn.grid(row = 4, padx = 10, pady = 10, column = 60, columnspan = 1,sticky = N+S+E+W)
 
     def send_emails(self):
+        logger.info("Closing PDF Preview")
         self.root.destroy()
+        logger.info("Sending Emails")
         MailGUI(self.data)
     

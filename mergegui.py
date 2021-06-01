@@ -11,6 +11,9 @@ from mailgui import MailGUI
 from pdfgui import PDF_Preview
 
 import threading
+import os
+import logging
+logger = logging.getLogger(f"MailMerge.{os.path.basename(__file__)}")
 
 class MergeGUI:
     def __init__(self):
@@ -26,11 +29,17 @@ class MergeGUI:
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.root.resizable(False,False)
 
+        logger.info("Initialising Template Input")
         self.add_template_inp()
+        logger.info("Initialising Merge Field display")
         self.add_merge_fields()
+        logger.info("Initialising Excel Input")
         self.add_excel_inp()
+        logger.info("Initialising Excel Field display")
         self.add_excel_fields()
+        logger.info("Initialising Generate Button")
         self.add_generate_btn()
+        logger.info("Initialising copyright Label")
         self.add_copyright_lbl()
         
 
@@ -40,12 +49,15 @@ class MergeGUI:
         if messagebox.askokcancel("Quit", "Do you want to quit?"):
             self.root.destroy()
             self.root.quit()
+            logger.info("Quiting Application")
 
     def show_alert(self,code,message):
         if code == "showinfo":
             messagebox.showinfo(code,message)
+            logger.info(f"{message}")
             return
         messagebox.showerror(code,message)
+        logger.error(f"{message}")
     
     def add_template_inp(self):
         self.template_lbl = Label(self.root,text = "Template File")
@@ -96,7 +108,7 @@ class MergeGUI:
         if len(excel_dir.get()) < 1:
             self.show_alert("showerror","Enter Data file")
             return
-        
+        logger.info("Initialising Progressbar")
         self.add_progress_bar()
         
         thread1 = threading.Thread(target = self.start_merge)
@@ -107,24 +119,34 @@ class MergeGUI:
         mailMerge.init_setup()
         mailMerge.read_template()
         mailMerge.read_excel()
+        
         data = mailMerge.EXCEL_DATA.read_data()
         total = len(data.index)
         cnt = 70 // total
         idx = 1
+        
         for fields in data.to_dict(orient='records'):
             self.progress['value'] += cnt
             self.var.set(f"Merging ({idx} / {total})")
+            logger.info(f"Merging ({idx} / {total})")
             idx += 1
             mailMerge.merge_doc(fields)
+        
         self.var.set("Converting PDFs")
+        logger.info("Converting Merged Docs to PDF")
+        
         mailMerge.convert_pdf()
         self.var.set(f"Converted {total} files to PDF")
+        logger.info(f"Converted {total} files to PDF")
+        
         self.progress['value'] = 100
         self.show_alert("showinfo",f"Processed {total} files")
 
+        logger.info("Removing Progressbar")
         self.progress_lbl.grid_forget()
         self.progress.grid_forget()
 
+        logger.info("Generating PDF Previews")
         PDF_Preview(data)
 
     def data_str(self,data):
@@ -141,6 +163,7 @@ class MergeGUI:
         fields = doc.merge_fields()
         fields_str = self.data_str(fields)
         
+        logger.info("Displaying merge fields from template file")
         self.merge_fields_lbl.grid(row = 2, padx = 10 , pady = 5, column = 0, columnspan = 2,sticky = N+S+E+W)
         self.merge_fields.configure(state='normal')
         self.merge_fields.delete("1.0",END)
@@ -160,6 +183,7 @@ class MergeGUI:
         excel_headers_str = self.data_str(excel_data.columns)
         excel_headers_str += f"\nNumber of Rows : {len(excel_data.index)}"
         
+        logger.info("Displaying Excel Headers")
         self.excel_header_lbl.grid(row = 4, padx = 10 , pady = 5, column = 0, columnspan = 2,sticky = N+S+E+W)
         self.excel_headers.configure(state='normal')
         self.excel_headers.delete("1.0",END)

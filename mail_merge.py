@@ -4,6 +4,11 @@ from readData import ReadExcel
 from readTemplate import ReadTemplate
 from docx2pdf import convert
 import threading
+import traceback
+import os
+
+import logging
+logger = logging.getLogger(f"MailMerge.{os.path.basename(__file__)}")
 
 class MailMerge:
     def __init__(self,template_file="",excel_file=""):
@@ -36,14 +41,11 @@ class MailMerge:
         cnt = 100 // total
         idx = 1
         for fields in data.to_dict(orient='records'):
-            if 'Date' not in fields:
-                fields['Date'] = datetime.now().strftime("%d %B, %Y")
-            doc = self.read_template()
-            doc.populate_fields(fields)
-            doc.save(self.setup.DOCS_PATH)
+            self.merge_doc(fields)
             if progress != None:
                 progress['value'] += cnt
                 progress_lbl.set(f"Merging ({idx} / {total})")
+                logger.info(f"Merging ({idx} / {total})")
         convert(self.setup.DOCS_PATH,self.setup.PDF_PATH)
         self.setup.cleanup()
 

@@ -11,6 +11,10 @@ from lbox import LBox
 from config import Config_data
 from imap_email import Send_Mail
 
+import os
+import logging
+logger = logging.getLogger(f"MailMerge.{os.path.basename(__file__)}")
+
 class MailGUI:
     def __init__(self,data):
         self.data = data
@@ -40,7 +44,6 @@ class MailGUI:
     def on_closing(self):
         if messagebox.askokcancel("Quit", "Do you want to quit?"):
             self.root.destroy()
-            self.root.quit()
 
     def add_server_picker(self):
         self.server_lbl = Label(self.root,text = "Email Server")
@@ -104,7 +107,7 @@ class MailGUI:
     def run_script(self):
         #Tk().withdraw()
         self.pwd= simpledialog.askstring("Password", "Enter password:", show='*')
-        print(self.pwd)
+        #print(self.pwd)
         self.root.focus()
         
         thread1 = threading.Thread(target = self.send_emails)
@@ -114,7 +117,7 @@ class MailGUI:
         self.var = StringVar()
 
         self.status_lbl = Label(self.root,textvariable = self.var)
-        self.status_lbl.grid(row = 13, padx = 10 , pady = 10, column = 1, columnspan = 10,sticky = N+S+E+W)
+        self.status_lbl.grid(row = 13, padx = 10 , pady = 10, column = 1, columnspan = 20,sticky = N+S+E+W)
         
         self.progress = Progressbar(self.root,orient = HORIZONTAL, length = 100, mode = 'determinate')
         self.progress.grid(row = 15, padx = 10, pady = 10, column = 1, columnspan = 60,sticky = N+S+E+W)

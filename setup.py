@@ -6,6 +6,9 @@ from datetime import datetime
 from string import Template
 import json
 
+import traceback
+import logging
+
 class Setup:
     
     def __init__(self):
@@ -17,6 +20,7 @@ class Setup:
     def setup(self):
         self.setup_path()
         self.LOGFILE = os.path.join(self.DATA_PATH,f'Mail_Merge Log {datetime.now().strftime("%Y-%m-%d_%H-%M")}.log')
+        self.setup_logger()
         self.DOCS_PATH = os.path.join(self.DATA_PATH,"Docs")
         self.PDF_PATH = os.path.join(self.DATA_PATH,"Pdf")
         if not os.path.exists(self.LOGFILE):
@@ -29,6 +33,11 @@ class Setup:
                 fp.close()
         except Exception:
             pass
+
+    def setup_logger(self):
+        logging.basicConfig(level=logging.DEBUG, filename=self.LOGFILE, filemode="a+",format="%(asctime)-10s :: %(levelname)-8s --> %(message)s")
+        logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
+        self.logger = logging.getLogger(f"MailMerge.{os.path.basename(__file__)}")
     
     def setup_path(self):
         PLATFORM = sys.platform
@@ -41,13 +50,19 @@ class Setup:
             self.DATA_PATH = temp_data_path
 
     def cleanup(self):
+        self.logger.info("Cleaning up Merged docs")
         doc_files_path = os.path.join(self.DOCS_PATH,"*")
         files = glob.glob(doc_files_path)
         for file in files:
-            os.remove(file)
+            try:
+                with open(file) as fp:
+                    fp.close()
+                os.remove(file)
+            except Exception as e:
+                self.logger.exception(e)
 
     def setup_signature(self):
-        print(self.configData)
+        #print(self.configData)
         sender_details = self.setup_sender_details().substitute(**self.configData)
         org_details = self.setup_organisation().substitute(**self.configData)
 
@@ -58,10 +73,6 @@ class Setup:
         return self.signature
 
     def setup_sender_details(self):
-        #self.sender_name = self.configData['sender_name']
-        #self.sender_designation = "President"
-        #self.sender_department = "Codechef UEMK Chapter"
-
         self.sender_details = "$sender_name\n$sender_designation\n$sender_department"
         self.sender_details = self.sender_details.replace("\n","<br/>")
 
@@ -70,11 +81,6 @@ class Setup:
         return self.sender_details
 
     def setup_organisation(self):
-        #self.org_name = "University Of Engineering & Management, Kolakta"
-        #self.org_group = "(IEM-UEM Group)"
-        #self.org_addr = "University Area, Plot No. III - B/5\nMain Arterial Road, New Town\nAction Area - III, Kolkata 700 160"
-        #self.org_website = "http://www.uem.edu.in/"
-
         self.org_details = '$org_name\n$org_group\n$org_addr\nWebsite: <a href="$org_website">$org_website</a>'
         self.org_details = self.org_details.replace("\n","<br/>")
 

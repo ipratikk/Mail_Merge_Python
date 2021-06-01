@@ -8,6 +8,10 @@ from tkinter import messagebox
 from inpbox import InpBox
 from config import Config_data
 
+import os
+import logging
+logger = logging.getLogger(f"MailMerge.{os.path.basename(__file__)}")
+
 class LBox(object):
     def __init__(self,title,strVar,items=None,select=MULTIPLE,isEditable=True):
         self.config = Config_data()

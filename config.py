@@ -3,6 +3,8 @@ import json
 from pathlib import Path
 from collections import defaultdict
 
+import logging
+logger = logging.getLogger(f"MailMerge.{os.path.basename(__file__)}")
 
 class Config_data:
 
@@ -17,22 +19,26 @@ class Config_data:
         self.cc_data = self.load_cc()
 
     def load_sender(self):
+        logger.info("Loading sender data")
         data = defaultdict(str)
         if "Sender" in self.config_data:
             return self.config_data['Sender']
         return data
     
     def load_to(self):
+        logger.info("Loading Receipent data")
         data = {'Desc':'Receipent Email','Items':self.email_list}
         return data
 
     def load_cc(self):
+        logger.info("Loading CC data")
         data = defaultdict(str)
         if "CC" in self.config_data:
             return self.config_data['CC']
         return data
 
     def update_sender(self,items):
+        logger.info("Updating sender data")
         self.sender_data['Desc'] = "Sender Email"
         self.sender_data['Items'] = items
         self.config_data['Sender'] = self.sender_data
@@ -40,18 +46,21 @@ class Config_data:
         
 
     def update_to(self,items):
+        logger.info("Updating Receipent Data")
         self.to_data['Desc'] = "Receipent Email"
         self.to_data['Items'] = self.email_list
         self.config_data['To'] = self.to_data
         self.dump_json(self.config_file,self.config_data)
 
     def update_cc(self,items):
+        logger.info("Updating CC data")
         self.cc_data['Desc'] = "CC Email(s)"
         self.cc_data['Items'] = items
         self.config_data['CC'] = self.cc_data
         self.dump_json(self.config_file,self.config_data)
 
     def read_json(self):
+        logger.info("Reading JSON")
         data = None
         if not self.check_exists(self.config_file):
             self.create_tree(self.config_file)
@@ -62,6 +71,7 @@ class Config_data:
         return data
 
     def dump_json(self,config_file,data):
+        logger.info("Dumping JSON")
         with open(config_file,"w") as fp:
             json.dump(data,fp)
             fp.close()
@@ -72,6 +82,7 @@ class Config_data:
         return False
 
     def create_tree(self,config_file):
+        logger.info("Creating Configuration tree")
         Path(self.temp_data_path).mkdir(parents=True, exist_ok=True)
         data = defaultdict(list)
         data['Sender'] = {'Desc':'Sender Email','Items':[]}

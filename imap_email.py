@@ -8,6 +8,8 @@ from email import encoders
 import email
 
 from setup import Setup
+import logging
+logger = logging.getLogger(f"MailMerge.{os.path.basename(__file__)}")
 
 class Send_Mail():
     def __init__(self,server_str,sender_email_str,receipent_str,cc_str,subject_str,body_str,data,status_str=None,progressbar=None):
@@ -39,29 +41,45 @@ class Send_Mail():
                 pass
 
     def updateUI(self,message=None,cnt=0):
+        logger.info(message)
         if self.status_str:
             self.status_str.set(message)
             self.progressbar['value'] += cnt
         
 
-    def login(self,username=None,password=None):
+    def login(self,password,username=None):
         if not username:
             username = self.SENDER
+        self.password = password
         self.updateUI(f"Logging in user : {username}",10)
         self.SMTP_MAILBOX.login(username,password)
 
+    def reconnect(self):
+        logger.info("Reconnecting to SMTP mailbox")
+        self.SMTP_MAILBOX.logout()
+        self.login(self.password)
+
+    def send_email(self,row,cnt,idx,total):
+        msg = self.createMessage(row)
+        text = msg.as_bytes().decode()
+        rcpt = [row['Email']] + self.cc_emails
+        # sending the mail
+        self.updateUI(f"Sending Email to {row['Email']}......({idx} / {total})")
+        self.SMTP_MAILBOX.sendmail(self.SENDER, rcpt, text)
+        self.updateUI(f"Sent Email to {row['Email']}",cnt)
+
     def send_emails(self):
         total = len(self.data.index)
-        cnt = 70 // total
+        cnt = 70 / total
+        idx = 1
         for row in self.data.to_dict(orient='records'):
-            msg = self.createMessage(row)
-            text = msg.as_bytes().decode()
-            rcpt = [row['Email']] + self.cc_emails
-            # sending the mail
-            self.updateUI(f"Sending Email to {row['Email']}...")
-            self.SMTP_MAILBOX.sendmail(self.SENDER, rcpt, text)
-            self.updateUI(f"Sent Email to {row['Email']}",cnt)
-        self.updateUI("Sent Emails",10)
+            try:
+                self.send_email(row,cnt,idx,total)
+            except SMTPRecipientsRefused:
+                self.reconnect()
+                self.send_email(row,cnt,idx,total)
+            idx += 1
+        self.updateUI("Sent Emails",100)
 
     def setupBody(self,row):
         name = row['Name']
