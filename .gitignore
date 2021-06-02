@@ -130,4 +130,4 @@ dmypy.json
 *.docx
 *.ipynb
 configuration.json
-Assets
+Output
