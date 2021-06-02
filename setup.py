@@ -1,3 +1,5 @@
+from tkinter import *
+
 import sys
 import os
 import glob
@@ -8,6 +10,16 @@ import json
 
 import traceback
 import logging
+
+import ctypes
+try: # >= win 8.1
+    ctypes.windll.shcore.SetProcessDpiAwareness(2)
+except Exception as e:
+    pass
+try: # < win 8.1
+    ctypes.windll.user32.SetProcessDPIAware()
+except: # win 8.0 or less
+    pass
 
 class Setup:
     
@@ -20,13 +32,13 @@ class Setup:
     def setup(self):
         self.setup_path()
         self.LOGFILE = os.path.join(self.DATA_PATH,f'Mail_Merge Log {datetime.now().strftime("%Y-%m-%d_%H-%M")}.log')
-        self.setup_logger()
         self.DOCS_PATH = os.path.join(self.DATA_PATH,"Docs")
         self.PDF_PATH = os.path.join(self.DATA_PATH,"Pdf")
         if not os.path.exists(self.LOGFILE):
             Path(self.DATA_PATH).mkdir(parents=True, exist_ok=True)
             Path(self.DOCS_PATH).mkdir(parents=True, exist_ok=True)
             Path(self.PDF_PATH).mkdir(parents=True, exist_ok=True)
+        self.setup_logger()
         try:
             with open("configuration.json","r") as fp:
                 self.configData = json.load(fp)
@@ -60,6 +72,17 @@ class Setup:
                 os.remove(file)
             except Exception as e:
                 self.logger.exception(e)
+
+    def get_display_size(self):
+        root = Tk()
+        root.update_idletasks()
+        root.attributes('-fullscreen', True)
+        root.state('iconic')
+        height = root.winfo_screenheight()
+        width = root.winfo_screenwidth()
+        root.destroy()
+        root.quit()
+        return height, width
 
     def setup_signature(self):
         #print(self.configData)

@@ -43,7 +43,7 @@ class LBox(object):
         self.set_select_method(self.select)
         self.add_lbox()
         self.config_yscrollbar()
-        self.add_ok_btn(fill = BOTH, expand = 1, padx = 40)
+        self.add_ok_btn(fill = BOTH, expand = 1, padx = 40,pady = 10)
 
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.root.resizable(False,False)

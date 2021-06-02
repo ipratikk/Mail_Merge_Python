@@ -24,8 +24,9 @@ class InpBox:
 
         if self.title == "Sender":
             self.add_sender_inp()
-            
-        self.add_data_inp()
+            self.add_data_inp(self.title + " email")
+        else:
+            self.add_data_inp(self.title)
         self.add_ok_btn()
         self.add_cancel_btn()
         
@@ -37,8 +38,8 @@ class InpBox:
         self.sender_txt = Entry(self.root,font = "Consolas 12",width = "35")
         self.sender_txt.grid(row = 0,column = 3,padx =10,pady = 10,columnspan = 7)
 
-    def add_data_inp(self):
-        self.inp_lbl = Label(self.root,text = f"Enter new {self.title}:")
+    def add_data_inp(self,title):
+        self.inp_lbl = Label(self.root,text = f"Enter {title}:")
         self.inp_lbl.grid(row = 2,column = 0,padx = 10,pady = 10,columnspan = 2)
         self.inp_txt = Entry(self.root,font = "Consolas 12",width = "35")
         self.inp_txt.grid(row = 2,column = 3,padx =10,pady = 10,columnspan = 7)

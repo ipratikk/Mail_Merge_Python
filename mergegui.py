@@ -17,6 +17,8 @@ logger = logging.getLogger(f"MailMerge.{os.path.basename(__file__)}")
 
 class MergeGUI:
     def __init__(self):
+        setup = Setup()
+        self.screen_height,self.screen_width = setup.get_display_size()
         root = Tk()
         root.wm_title("Mail Merge Utility")
         root.minsize(500,200)
@@ -89,7 +91,7 @@ class MergeGUI:
 
     def add_copyright_lbl(self):
         copyright = "© 2021 Pratik Goel, Published in India"
-        self.cp_lbl = Label(self.root,text = copyright,)
+        self.cp_lbl = Label(self.root,text = copyright)
         self.cp_lbl.grid(row = 17, padx = 10 , pady = 10, column = 5, columnspan = 12,sticky = N+S+E+W)
 
     def add_progress_bar(self):
@@ -147,7 +149,7 @@ class MergeGUI:
         self.progress.grid_forget()
 
         logger.info("Generating PDF Previews")
-        PDF_Preview(data)
+        PDF_Preview(data,height=self.screen_height)
 
     def data_str(self,data):
         return ", ".join(sorted(data))
@@ -191,3 +193,5 @@ class MergeGUI:
         self.excel_headers.configure(state='disabled')
         self.excel_headers.grid(row = 4, column = 3,padx = 10, pady = 5,columnspan = 20,sticky = N+S+E+W)
             
+if __name__ == "__main__":
+    MergeGUI()

@@ -14,7 +14,13 @@ logger = logging.getLogger(f"MailMerge.{os.path.basename(__file__)}")
 
 
 class PDF_Preview:
-    def __init__(self,data):
+    def __init__(self,data,width=1600,height=450):
+        self.screen_height = height
+        self.screen_width = width
+
+        self.height = self.screen_height - 100
+        self.width = self.screen_width // 2
+
         self.setup = Setup()
         self.data = data
         self.idx_str = StringVar()
@@ -26,10 +32,11 @@ class PDF_Preview:
         logger.info("Initialising PDF Preview GUI")
         top = Toplevel()
         top.wm_title("Mail Merge Preview")
-        top.minsize(550,750)
-        top.resizable(False,False)
+        #top.geometry(f"{self.width}x{self.height}")
+        top.maxsize(self.width,self.height)
+        top.resizable(True,True)
         top.grab_set()
-        top.focus()
+        top.lift()
 
         self.root = top
 
@@ -55,7 +62,7 @@ class PDF_Preview:
         except Exception:
             pass
         v2 = v1.pdf_view(self.root, pdf_location = pdf_path ,width = 75, height = 40, bar = False)
-        v2.grid(row = 1, padx = 10, pady = 10, column = 1, columnspan = 60,sticky = N+S+E+W)
+        v2.grid(row = 7, padx = 10, pady = 10, column = 1, columnspan = 60,sticky = N+S+E+W)
         self.idx_str.set(f"Preview : {self.idx[0]+1}/{self.total}")
 
     def prev_file(self,idx):
@@ -96,11 +103,11 @@ class PDF_Preview:
 
     def add_cancel_btn(self):
         self.cancel_btn = Button(self.root,text = "Cancel",width=10,command = self.root.destroy)
-        self.cancel_btn.grid(row = 4, padx = 10, pady = 10, column = 57, columnspan = 1,sticky = N+S+E+W)
+        self.cancel_btn.grid(row = 1, padx = 10, pady = 10, column = 57, columnspan = 1,sticky = N+S+E+W)
 
     def add_send_btn(self):
         self.send_btn = Button(self.root,text = "Send Emails",width=10,command = self.send_emails)
-        self.send_btn.grid(row = 4, padx = 10, pady = 10, column = 60, columnspan = 1,sticky = N+S+E+W)
+        self.send_btn.grid(row = 1, padx = 10, pady = 10, column = 60, columnspan = 1,sticky = N+S+E+W)
 
     def send_emails(self):
         logger.info("Closing PDF Preview")

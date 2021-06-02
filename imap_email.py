@@ -72,14 +72,18 @@ class Send_Mail():
         total = len(self.data.index)
         cnt = 70 / total
         idx = 1
-        for row in self.data.to_dict(orient='records'):
-            try:
-                self.send_email(row,cnt,idx,total)
-            except SMTPRecipientsRefused:
-                self.reconnect()
-                self.send_email(row,cnt,idx,total)
-            idx += 1
-        self.updateUI("Sent Emails",100)
+        try:
+            for row in self.data.to_dict(orient='records'):
+                try:
+                    self.send_email(row,cnt,idx,total)
+                except SMTPRecipientsRefused:
+                    self.reconnect()
+                    self.send_email(row,cnt,idx,total)
+                idx += 1
+            self.updateUI("Sent Emails",100)
+            return True
+        except Exception as e:
+            return False
 
     def setupBody(self,row):
         name = row['Name']

@@ -1,5 +1,5 @@
 import threading
-
+import smtplib 
 from tkinter import *
 from tkinter.ttk import *
 from tkinter.scrolledtext import ScrolledText
@@ -10,6 +10,7 @@ from tkinter import messagebox
 from lbox import LBox
 from config import Config_data
 from imap_email import Send_Mail
+
 
 import os
 import logging
@@ -24,7 +25,7 @@ class MailGUI:
         root.wm_title("Email Client")
         root.minsize(500,250)
         root.grab_set()
-        root.focus()
+        root.lift()
 
         self.root = root
         self.add_server_picker()
@@ -45,6 +46,15 @@ class MailGUI:
         if messagebox.askokcancel("Quit", "Do you want to quit?"):
             self.root.destroy()
 
+    def show_alert(self,code,message):
+        if code == "showinfo":
+            messagebox.showinfo(code,message)
+            self.root.lift()
+            logger.info(f"{message}")
+            return
+        messagebox.showerror(code,message)
+        logger.error(f"{message}")
+
     def add_server_picker(self):
         self.server_lbl = Label(self.root,text = "Email Server")
         self.server = Combobox(self.root,width="5",state = "readonly")
@@ -55,7 +65,7 @@ class MailGUI:
 
     def add_sender_email(self):
         self.sender_email_str = StringVar()
-        self.sender_email_lbl = Label(self.root,text = "Sender Email")
+        self.sender_email_lbl = Label(self.root,text = "Sender")
         self.sender_email_lbl.grid(row = 1, padx = 10 , pady = 10, column = 4, columnspan = 4,sticky = N+S+E+W)
         self.sender_email = Entry(self.root,font = "Consolas 10",textvariable = self.sender_email_str,state = "readonly")
         self.sender_email.grid(row = 1, padx = 10 , pady = 10, column = 8, columnspan = 12,sticky = N+S+E+W)
@@ -107,8 +117,7 @@ class MailGUI:
     def run_script(self):
         #Tk().withdraw()
         self.pwd= simpledialog.askstring("Password", "Enter password:", show='*')
-        #print(self.pwd)
-        self.root.focus()
+        self.root.lift()
         
         thread1 = threading.Thread(target = self.send_emails)
         thread1.start()
@@ -125,5 +134,15 @@ class MailGUI:
         
         obj = Send_Mail(self.server,self.sender_email_str,self.receipent_str,self.cc_str,self.subject_str,self.body,self.data,status_str=self.var,progressbar=self.progress)
         #pwd = simpledialog.askstring(title="Authenticate Email",prompt=f"Enter password:")
-        obj.login(password=self.pwd)
-        obj.send_emails()
+        try:
+            obj.login(password=self.pwd)
+        except smtplib.SMTPAuthenticationError:
+            self.show_alert("showerror","Authentication Error, Check credentials")
+            self.var.set("Authentication Error!")
+            return
+
+        sent = obj.send_emails()
+        if sent:
+            self.show_alert("showinfo","Sent all emails")
+        else:
+            self.show_alert("showerror","Some Error Occured, Checks logs for more!")
