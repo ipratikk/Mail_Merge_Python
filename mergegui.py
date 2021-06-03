@@ -9,6 +9,7 @@ from mail_merge import MailMerge
 from tkPDFViewer import tkPDFViewer as pdf
 from mailgui import MailGUI
 from pdfgui import PDF_Preview
+from init_config import InitSetup
 
 import threading
 import os
@@ -17,8 +18,6 @@ logger = logging.getLogger(f"MailMerge.{os.path.basename(__file__)}")
 
 class MergeGUI:
     def __init__(self):
-        setup = Setup()
-        self.screen_height,self.screen_width = setup.get_display_size()
         root = Tk()
         root.wm_title("Mail Merge Utility")
         root.minsize(500,200)
@@ -39,12 +38,19 @@ class MergeGUI:
         self.add_excel_inp()
         logger.info("Initialising Excel Field display")
         self.add_excel_fields()
+        logger.info("Initialising Configure Button")
+        self.add_configure_btn()
         logger.info("Initialising Generate Button")
         self.add_generate_btn()
         logger.info("Initialising copyright Label")
         self.add_copyright_lbl()
-        
 
+        if not os.path.exists("configuration.json"):
+            self.init_configure()
+        
+        setup = Setup()
+        self.screen_height,self.screen_width = setup.get_display_size()
+        
         self.root.mainloop()
 
     def on_closing(self):
@@ -85,9 +91,13 @@ class MergeGUI:
         self.excel_header_lbl = Label(self.root,text = "Data Fields")
         self.excel_headers = ScrolledText(self.root,font = ("Times New Roman",10), state = "disabled",width = "30",height = "1")
 
+    def add_configure_btn(self):
+        self.gen = Button(self.root,text = "Configure",command = self.init_configure)
+        self.gen.grid(row = 7, padx = 10, pady = 10, column = 1, columnspan = 10,sticky = N+S+E+W)
+
     def add_generate_btn(self):
         self.gen = Button(self.root,text = "Start Mail Merge",command = lambda:self.run_script(self.template_str,self.excel_str))
-        self.gen.grid(row = 7, padx = 10, pady = 10, column = 2, columnspan = 18,sticky = N+S+E+W)
+        self.gen.grid(row = 7, padx = 10, pady = 10, column = 11, columnspan = 18,sticky = N+S+E+W)
 
     def add_copyright_lbl(self):
         copyright = "© 2021 Pratik Goel, Published in India"
@@ -102,6 +112,10 @@ class MergeGUI:
         self.progress = Progressbar(self.root,orient = HORIZONTAL, length = 100, mode = 'determinate')
         self.progress.grid(row = 15, padx = 10, pady = 10, column = 1, columnspan = 60,sticky = N+S+E+W)
         self.progress['value'] = 0
+
+    def init_configure(self):
+        self.root.withdraw()
+        InitSetup(self.root)
 
     def run_script(self,template_dir,excel_dir):
         if len(template_dir.get()) < 1:

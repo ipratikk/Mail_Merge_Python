@@ -6,6 +6,7 @@ from email.mime.base import MIMEBase
 from email.mime.image import MIMEImage
 from email import encoders
 import email
+import traceback
 
 from setup import Setup
 import logging
@@ -127,12 +128,16 @@ class Send_Mail():
     def addOrgImage(self,org_logo,related):
         self.updateUI("Attaching image")
         msgImage = None
-        with open(org_logo,"rb") as fp:
-            msgImage = MIMEImage(fp.read(),"png")
-            fp.close()
-        msgImage.add_header('Content-ID', '<image1>')
-        msgImage.add_header('Content-Disposition', 'inline; filename="logo.png"')
-        related.attach(msgImage)
+        try:
+            with open(org_logo,"rb") as fp:
+                msgImage = MIMEImage(fp.read(),"png")
+                fp.close()
+            msgImage.add_header('Content-ID', '<image1>')
+            msgImage.add_header('Content-Disposition', 'inline; filename="logo.png"')
+            related.attach(msgImage)
+        except Exception:
+            traceback.print_exc()
+            pass
 
     def attachFile(self,row,msg):
         self.updateUI("Attaching PDF")

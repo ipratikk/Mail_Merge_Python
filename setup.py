@@ -40,11 +40,34 @@ class Setup:
             Path(self.PDF_PATH).mkdir(parents=True, exist_ok=True)
         self.setup_logger()
         try:
-            with open("configuration.json","r") as fp:
-                self.configData = json.load(fp)
-                fp.close()
+            self.readJSON()
         except Exception:
+            self.createJSON()
             pass
+
+    def readJSON(self):
+        with open("configuration.json","r") as fp:
+            self.configData = json.load(fp)
+            fp.close()
+
+    def createJSON(self):
+        dataMap = {
+            "sender_name" : "",
+            "sender_email" : "",
+            "sender_designation" : "",
+            "sender_department" : "",
+            "org_name" : "",
+            "org_group" : "",
+            "org_addr" : "",
+            "org_website" : "",
+            "org_logo" : ""
+        }
+        self.dumpJSON(dataMap)
+
+    def dumpJSON(self,dataMap):
+        with open("configuration.json","w") as fp:
+            json.dump(dataMap,fp)
+        self.readJSON()
 
     def setup_logger(self):
         logging.basicConfig(level=logging.DEBUG, filename=self.LOGFILE, filemode="a+",format="%(asctime)-10s :: %(levelname)-8s --> %(message)s")
