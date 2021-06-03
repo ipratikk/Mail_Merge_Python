@@ -84,6 +84,8 @@ class Send_Mail():
             self.updateUI("Sent Emails",100)
             return True
         except Exception as e:
+            traceback.print_exc
+            logger.exception(e)
             return False
 
     def setupBody(self,row):
